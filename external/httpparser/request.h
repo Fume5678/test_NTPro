@@ -49,6 +49,16 @@ struct Request {
         stream << "+ keep-alive: " << keepAlive << "\n";;
         return stream.str();
     }
+
+    std::string content_as_str(){
+        std::string str;
+
+        for(auto ch: content){
+            str += ch;
+        }
+        
+        return str;
+    }
 };
 
 } // namespace httpparser
