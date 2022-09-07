@@ -443,3 +443,4 @@ FodyWeavers.xsd
 *.sln.iml
 
 build/
+.vscode/
