@@ -28,7 +28,7 @@ void ConHandler::handle_read(const boost::system::error_code& err,
     if (!err) {
         cout << "[INFO] Request: " << request_msg << endl << endl;
     } else {
-        std::cerr << "error: " << err.message() << endl << endl;
+        std::cerr << "[ERROR]: " << err.message() << endl << endl;
         sock.close();
     }
 
@@ -64,7 +64,7 @@ void ConHandler::handle_write(const boost::system::error_code& err,
     if (!err) {
         cout << "[INFO] Responce:\n" << response_msg << endl << endl;
     } else {
-        std::cerr << "error: " << err.message() << endl << endl;
+        std::cerr << "[ERROR]: " << err.message() << endl << endl;
         sock.close();
     }
 }

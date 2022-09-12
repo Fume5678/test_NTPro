@@ -4,6 +4,8 @@ void Server::start_accept() {
     // socket
     ConHandler::pointer connection = ConHandler::create(io_context_);
 
+    std::cout << "[INFO] Ready for connection" << std::endl;
+
     // asynchronous accept operation and wait for a new connection.
     acceptor_.async_accept(connection->socket(),
                            boost::bind(&Server::handle_accept,
