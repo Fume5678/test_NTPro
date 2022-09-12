@@ -10,14 +10,14 @@
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/asio.hpp>
 
+#include <RequestHandler.h>
+
 using namespace boost::asio;
 using ip::tcp;
 using std::cout;
 using std::endl;
 
 class ConHandler;
-
-
 
 class ConHandler : public boost::enable_shared_from_this<ConHandler> {
 private:
@@ -26,6 +26,7 @@ private:
     std::string request_msg;
     enum { max_length = 1024 };
     char buffer[max_length];
+    RequestHandler req_handler;
 
 public:
     using pointer =  boost::shared_ptr<ConHandler>;

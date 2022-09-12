@@ -42,8 +42,11 @@ void ConHandler::handle_read(const boost::system::error_code& err,
         std::cout << request.uri << std::endl;
 
         for(auto ch : request.content){
-            std::cout << ch;
+            std::cout << ch ;
         }
+        std::cout << endl;
+        
+        response_msg = req_handler.get_response(request);
     } else {
         response_msg = "HTTP/1.1 400 BadRequest\r\n\r\n";
     }
@@ -59,7 +62,7 @@ void ConHandler::handle_read(const boost::system::error_code& err,
 void ConHandler::handle_write(const boost::system::error_code& err,
                               size_t bytes_transferred) {
     if (!err) {
-        cout << "[INFO] Responce: " << response_msg << endl << endl;
+        cout << "[INFO] Responce:\n" << response_msg << endl << endl;
     } else {
         std::cerr << "error: " << err.message() << endl << endl;
         sock.close();
