@@ -1,6 +1,7 @@
 #include <OrderHandler.h>
 #include <iostream>
 #include <nlohmann/json.hpp>
+#include <UserHandler.h>
 
 using namespace nlohmann;
 
@@ -48,8 +49,8 @@ std::shared_ptr<OrderHandler> OrderHandler::get_instance() {
 }
 
 void OrderHandler::add_order(const Order& order) {
-    // TODO не добавляет ключи в спискам ордеров
     mtx.lock();
+    // TODO добавить сортировку по цене при добавлении 
     shared_ptr<Order> new_order = std::make_shared<Order>(order);
     try {
         order_map.at(order.order_pair).push_back(new_order);
@@ -68,10 +69,16 @@ void OrderHandler::add_order(const Order& order) {
         users.insert({order.user_id, orders_weak});
     }
     mtx.unlock();
+
+    match(order.order_pair);
 }
 
 std::optional<vector<Order>>
     OrderHandler::get_orders_by_user(std::string user_id) {
+    
+    if(!UserHandler::get_instance()->verify_user(user_id)){
+        return std::nullopt;
+    }
 
     try {
         vector<Order> orders;
@@ -94,8 +101,8 @@ std::optional<vector<Order>>
     }
 }
 
-void OrderHandler::match(Order& order) {
+void OrderHandler::match(OrderPair order_pair) {
     mtx.lock();
-
+    auto orders = order_map.at(order_pair);
     mtx.unlock();
 }

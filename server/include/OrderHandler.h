@@ -58,7 +58,7 @@ using UserMap   = map<string, vector<weak_ptr<Order>>>;
 using OrderMap  = map<std::string, OrderList>;
 
 class OrderHandler {
-    void match(Order& order);
+    void match(OrderPair order_pair);
 
     OrderHandler() {}
 
