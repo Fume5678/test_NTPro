@@ -4,7 +4,10 @@ project(${this})
 
 if(WIN32)
     set (BOOST_ROOT "C:/boost_1_80_0/") # Путь к библиотеке Boost
+else()
+    set (BOOST_ROOT "/home/fume/Downloads/boost_1_80_0")
 endif()
+
 
 set(CMAKE_CXX_STANDARD 17)
 set (Boost_NO_SYSTEM_PATHS ON)
@@ -13,7 +16,7 @@ set (Boost_USE_STATIC_LIBS ON)
 set (Boost_USE_STATIC_RUNTIME OFF)
 set (BOOST_ALL_DYN_LINK OFF)
 
-find_package (Boost COMPONENTS system program_options thread REQUIRED) 
+find_package (Boost REQUIRED COMPONENTS system ) 
 
 FILE(GLOB_RECURSE SOURCES "src/*.cpp")
 FILE(GLOB_RECURSE HEADERS "include/*.h")

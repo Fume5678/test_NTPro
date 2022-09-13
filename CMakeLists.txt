@@ -5,5 +5,5 @@ project(${this})
 
 set(ROOT_PATH ${PROJECT_SOURCE_DIR})
 
-add_subdirectory(client)
+# add_subdirectory(client)
 add_subdirectory(server)

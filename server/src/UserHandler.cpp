@@ -8,13 +8,14 @@ UserHandler* UserHandler::get_instance() {
     return &s;
 }
 
-void UserHandler::add_user(User& user) {
-    if(users.find(user.user_id) != users.end()) {
-        std::cout << "[INFO] user " << user.user_id << " already exists" << std::endl;
+
+void UserHandler::add_user(const std::string& user_id) {
+    User new_user = {user_id, 500.0};
+    if(users.find(user_id) != users.end()) {
+        std::cout << "[INFO] user " << user_id << " already exists" << std::endl;
     } else {
-        user.balance = 500.0;
-        users.insert({user.user_id, user});
-        std::cout << "[INFO] user " << user.user_id << " added " << std::endl;
+        users.insert({user_id, new_user});
+        std::cout << "[INFO] user " << user_id << " added " << std::endl;
     }
 }
 
@@ -26,7 +27,7 @@ void UserHandler::update_user(const User& user) {
     }
 }
 
-optional<User> UserHandler::get_user(const string& user_id) {
+optional<User> UserHandler::get_user(const string& user_id) const{
     try{
         return users.at(user_id);
     } catch (out_of_range&) {
@@ -35,7 +36,7 @@ optional<User> UserHandler::get_user(const string& user_id) {
     }
 }
 
-map<string, User> UserHandler::get_users() {
+map<string, User> UserHandler::get_users(){
     return users;
 }
 

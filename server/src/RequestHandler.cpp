@@ -4,11 +4,11 @@
 #include <RequestHandler.h>
 #include <nlohmann/json.hpp>
 #include <OrderHandler.h>
+#include <UserHandler.h>
 
 using namespace httpparser;
 using namespace nlohmann;
 using std::string;
-using std::vector;
 
 std::string RequestHandler::get_response(Request request) {
     return route(request).serialize();
@@ -17,6 +17,9 @@ std::string RequestHandler::get_response(Request request) {
 Response RequestHandler::route(Request request) {
     std::tuple url(request.method, request.uri);
 
+    if (url == std::tuple("POST", "/api/add_user")) {
+        return add_user(request);
+    }
     if (url == std::tuple("POST", "/api/add_order")) {
         return add_order(request);
     }
@@ -30,6 +33,40 @@ Response RequestHandler::route(Request request) {
     }
 }
 
+
+/// @example
+/// {
+///     "user_id": "123123123"
+/// }
+httpparser::Response RequestHandler::add_user(httpparser::Request req) {
+    string user_id;
+    json   data = json::parse(req.content_as_str());
+    try {
+        user_id = data.at("user_id");
+    } catch (std::exception& e) {
+        std::cerr << e.what() << std::endl;
+        Response resp;
+        resp.statusCode = 400;
+        resp.status     = "Bad Request";
+        return resp;
+    }
+
+    UserHandler::get_instance()->add_user(user_id);
+
+    Response resp;
+    resp.statusCode = 200;
+    resp.status     = "Ok";
+    return resp;
+}
+
+/// @example
+/// {
+///     "user_id": "123123123",
+///     "source": "RUB",
+///     "target": "USD",
+///     "value": 20,
+///     "price": 61
+/// }
 Response RequestHandler::add_order(Request req) {
 
     Order order;
@@ -46,12 +83,17 @@ Response RequestHandler::add_order(Request req) {
         resp.status     = "Bad Request";
         return resp;
     }
+
+    if (!UserHandler::get_instance()->verify_user(order.user_id)) {
+        Response resp;
+        resp.statusCode = 403;
+        resp.status     = "Unauthorized";
+        return resp;
+    }
+
     OrderHandler::get_instance().get()->add_order(order);
 
-    Response             resp;
-    Response::HeaderItem cont_type{"Content-Type", "application/json"};
-    resp.headers.push_back(cont_type);
-    resp.content    = vector<char>();
+    Response resp;
     resp.statusCode = 200;
     resp.status     = "Ok";
 
@@ -68,6 +110,12 @@ Response RequestHandler::get_orders(Request req) {
         Response resp;
         resp.statusCode = 400;
         resp.status     = "Bad Request";
+        return resp;
+    }
+    if (!UserHandler::get_instance()->verify_user(user_id)) {
+        Response resp;
+        resp.statusCode = 403;
+        resp.status     = "Unauthorized";
         return resp;
     }
 
@@ -98,4 +146,3 @@ Response RequestHandler::get_orders(Request req) {
 
     return resp;
 }
-

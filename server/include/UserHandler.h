@@ -17,15 +17,15 @@ public:
     using UserMap = std::map<std::string, User>;
 
     static UserHandler* get_instance();
-    void add_user(User& user);
+    void add_user(const std::string& user_id);
     void update_user(const User& user);
-    std::optional<User> get_user(const std::string& user_id);
+    std::optional<User> get_user(const std::string& user_id) const;
     std::map<std::string, User> get_users();
 
     bool verify_user(const std::string& user_id);
 
 private:
-    UserMap users;
+    mutable UserMap users;
 };
 
 #endif // USERHANDLER_H

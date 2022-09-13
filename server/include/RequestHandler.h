@@ -11,8 +11,9 @@ public:
     httpparser::Response route(httpparser::Request request);
 
     // REST API
+    httpparser::Response add_user(httpparser::Request req);
     httpparser::Response add_order(httpparser::Request req);
-    httpparser::Response RequestHandler::get_orders(httpparser::Request req);
+    httpparser::Response get_orders(httpparser::Request req);
 };
 
 #endif // REQUESTHANDLER_H

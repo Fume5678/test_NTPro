@@ -75,10 +75,6 @@ void OrderHandler::add_order(const Order& order) {
 
 std::optional<vector<Order>>
     OrderHandler::get_orders_by_user(std::string user_id) {
-    
-    if(!UserHandler::get_instance()->verify_user(user_id)){
-        return std::nullopt;
-    }
 
     try {
         vector<Order> orders;
