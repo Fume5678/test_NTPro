@@ -53,9 +53,6 @@ public:
 };
 
 // using OrderPair = pair<string, string>;
-using OrderList = vector<shared_ptr<Order>>;
-using UserMap   = map<string, vector<weak_ptr<Order>>>;
-using OrderMap  = map<std::string, OrderList>;
 
 class OrderHandler {
     void match(OrderPair order_pair);
@@ -63,6 +60,10 @@ class OrderHandler {
     OrderHandler() {}
 
 public:
+    using OrderList = vector<shared_ptr<Order>>;
+    using UserMap   = map<string, vector<weak_ptr<Order>>>;
+    using OrderMap  = map<std::string, OrderList>;
+    
     static std::shared_ptr<OrderHandler> get_instance();
 
     void add_order(const Order& order);

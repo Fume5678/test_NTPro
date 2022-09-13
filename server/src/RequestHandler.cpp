@@ -25,6 +25,9 @@ Response RequestHandler::route(Request request) {
     }
     if (url == std::tuple("POST", "/api/get_orders")) {
         return get_orders(request);
+    }
+    if (url == std::tuple("POST", "/api/get_userdetail")) {
+        return get_userdetail(request);
     } else {
         Response resp;
         resp.status     = "Not Found";
@@ -32,7 +35,6 @@ Response RequestHandler::route(Request request) {
         return resp;
     }
 }
-
 
 /// @example
 /// {
@@ -144,5 +146,49 @@ Response RequestHandler::get_orders(Request req) {
     resp.headers.push_back(cont_len);
     resp.str_to_content(sstr_body.str());
 
+    return resp;
+}
+
+httpparser::Response RequestHandler::get_userdetail(httpparser::Request req) {
+    string user_id;
+    json   data = json::parse(req.content_as_str());
+    try {
+        user_id = data.at("user_id");
+    } catch (std::exception& e) {
+        std::cerr << e.what() << std::endl;
+        Response resp;
+        resp.statusCode = 400;
+        resp.status     = "Bad Request";
+        return resp;
+    }
+    if (!UserHandler::get_instance()->verify_user(user_id)) {
+        Response resp;
+        resp.statusCode = 403;
+        resp.status     = "Unauthorized";
+        return resp;
+    }
+
+    auto user = UserHandler::get_instance()->get_user(user_id);
+
+    json body = {
+        {"user_id", user_id},
+    };
+    json balance_arr = json::array();
+
+    for (const auto& bal: user->get().get_balance()) {
+        balance_arr.push_back({bal.first, bal.second});
+    }
+
+    body["balance"] = balance_arr;
+
+    Response resp;
+    resp.statusCode = 200;
+    resp.status     = "Ok";
+    Response::HeaderItem cont_type{"Content-Type", "application/json"};
+    Response::HeaderItem cont_len{"Content-Length",
+                                  std::to_string(body.dump().length())};
+    resp.headers.push_back(cont_type);
+    resp.headers.push_back(cont_len);
+    resp.str_to_content(body.dump());
     return resp;
 }

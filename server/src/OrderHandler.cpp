@@ -1,22 +1,24 @@
 #include <OrderHandler.h>
+#include <algorithm>
 #include <iostream>
 #include <nlohmann/json.hpp>
 #include <UserHandler.h>
+#include <type_traits>
 
 using namespace nlohmann;
 
 Order::Order() {
-    user_id = "";
+    user_id    = "";
     order_pair = {"", ""};
-    value   = 0.0;
-    price   = 0.0;
+    value      = 0.0;
+    price      = 0.0;
 }
 
 Order::Order(const Order& other) {
-    this->user_id = other.user_id;
-    this->order_pair  = other.order_pair;
-    this->value   = other.value;
-    this->price   = other.price;
+    this->user_id    = other.user_id;
+    this->order_pair = other.order_pair;
+    this->value      = other.value;
+    this->price      = other.price;
 }
 
 Order& Order::operator=(const Order& other) {
@@ -50,7 +52,7 @@ std::shared_ptr<OrderHandler> OrderHandler::get_instance() {
 
 void OrderHandler::add_order(const Order& order) {
     mtx.lock();
-    // TODO добавить сортировку по цене при добавлении 
+    // TODO добавить сортировку по цене при добавлении
     shared_ptr<Order> new_order = std::make_shared<Order>(order);
     try {
         order_map.at(order.order_pair).push_back(new_order);
@@ -99,6 +101,49 @@ std::optional<vector<Order>>
 
 void OrderHandler::match(OrderPair order_pair) {
     mtx.lock();
-    auto orders = order_map.at(order_pair);
+    OrderList orders = order_map.at(order_pair);
+    std::swap(order_pair.source, order_pair.target);
+    OrderList orders_reverse = order_map.at(order_pair);
+
+    auto comp = [](const shared_ptr<Order> a, const shared_ptr<Order> b) {
+        return a.get()->price < b.get()->price;
+    };
+
+    while (!orders.empty() && !orders_reverse.empty()) {
+
+        auto order = std::max_element(orders.begin(), orders.end(), comp);
+
+        auto order_reverse =
+            std::max_element(orders.begin(), orders.end(), comp);
+
+        double swap_val =
+            std::abs(order->get()->value - order_reverse->get()->value);
+
+        User user = UserHandler::get_instance()
+                        ->get_user(order->get()->user_id)
+                        .value();
+
+        User user_reverse = UserHandler::get_instance()
+                                ->get_user(order_reverse->get()->user_id)
+                                .value();
+
+        user.change_balance(
+            order->get()->order_pair.source,
+            swap_val * order->get()->price);
+
+        user.change_balance(
+            order->get()->order_pair.target,
+            swap_val / order->get()->price);
+
+        user_reverse.change_balance(
+            order->get()->order_pair.target,
+            swap_val * order_reverse->get()->price);
+
+        user_reverse.change_balance(
+            order->get()->order_pair.source,
+            swap_val / order_reverse->get()->price);
+        
+    }
+
     mtx.unlock();
 }
