@@ -14,6 +14,7 @@ public:
     httpparser::Response add_user(httpparser::Request req);
     httpparser::Response add_order(httpparser::Request req);
     httpparser::Response get_orders(httpparser::Request req);
+    httpparser::Response get_user_orders(httpparser::Request req);
     httpparser::Response get_userdetail(httpparser::Request req);
 };
 

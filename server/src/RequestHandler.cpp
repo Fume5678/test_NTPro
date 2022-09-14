@@ -26,6 +26,9 @@ Response RequestHandler::route(Request request) {
     if (url == std::tuple("POST", "/api/get_orders")) {
         return get_orders(request);
     }
+    if (url == std::tuple("POST", "/api/get_user_orders")) {
+        return get_user_orders(request);
+    }
     if (url == std::tuple("POST", "/api/get_userdetail")) {
         return get_userdetail(request);
     } else {
@@ -42,8 +45,8 @@ Response RequestHandler::route(Request request) {
 /// }
 httpparser::Response RequestHandler::add_user(httpparser::Request req) {
     string user_id;
-    json   data = json::parse(req.content_as_str());
     try {
+        json   data = json::parse(req.content_as_str());
         user_id = data.at("user_id");
     } catch (std::exception& e) {
         std::cerr << e.what() << std::endl;
@@ -103,6 +106,56 @@ Response RequestHandler::add_order(Request req) {
 }
 
 Response RequestHandler::get_orders(Request req) {
+    OrderPair pair;
+    json   data = json::parse(req.content_as_str());
+    try {
+        pair.source = data.at("source");
+        pair.target = data.at("target");
+    } catch (std::exception& e) {
+        std::cerr << e.what() << std::endl;
+        Response resp;
+        resp.statusCode = 400;
+        resp.status     = "Bad Request";
+        return resp;
+    }
+
+    auto opt_orders =
+        OrderHandler::get_instance().get()->get_order_list(pair);
+
+    int count = 0;
+    std::stringstream sstr_body;
+    sstr_body << "{\"orders\":[";
+
+    if (opt_orders.has_value()) {
+        auto orders = opt_orders.value();
+        while(!orders.get().empty()){
+            if(0 < count){
+                sstr_body << ", ";
+            } else {
+                count++;
+            }
+            sstr_body << orders.get().top().get()->serialize() ;
+            orders.get().pop();
+
+        }
+    }
+
+    sstr_body << "]}";
+
+    Response resp;
+    resp.statusCode = 200;
+    resp.status     = "Ok";
+    Response::HeaderItem cont_type{"Content-Type", "application/json"};
+    Response::HeaderItem cont_len{"Content-Length",
+                                  std::to_string(sstr_body.str().length())};
+    resp.headers.push_back(cont_type);
+    resp.headers.push_back(cont_len);
+    resp.str_to_content(sstr_body.str());
+
+    return resp;
+}
+
+Response RequestHandler::get_user_orders(Request req) {
     string user_id;
     json   data = json::parse(req.content_as_str());
     try {
@@ -124,13 +177,19 @@ Response RequestHandler::get_orders(Request req) {
     auto opt_orders =
         OrderHandler::get_instance().get()->get_orders_by_user(user_id);
 
+    int count = 0;
     std::stringstream sstr_body;
     sstr_body << "{\"orders\":[";
 
     if (opt_orders.has_value()) {
         auto orders = opt_orders.value();
         for (const auto& order : orders) {
-            sstr_body << order.serialize() << ", ";
+            if(0 < count){
+                sstr_body << ", ";
+            } else {
+                count++;
+            }
+            sstr_body << order.serialize();
         }
     }
 

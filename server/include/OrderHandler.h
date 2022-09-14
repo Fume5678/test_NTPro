@@ -7,8 +7,8 @@
 #include <map>
 #include <mutex>
 #include <memory>
-#include <utility>
-#include <tuple>
+#include <queue>
+#include <functional>
 #include <exception>
 #include <optional>
 
@@ -19,7 +19,7 @@ using std::shared_ptr;
 using std::string;
 using std::vector;
 using std::weak_ptr;
-//using std::tuple;
+// using std::tuple;
 
 class OrderPair {
 public:
@@ -35,13 +35,12 @@ public:
     }
 };
 
-
 class Order {
 public:
     std::string user_id;
-    OrderPair order_pair;
-    double      value;
-    double      price;
+    float       price;
+    float       value;
+    OrderPair   order_pair;
 
     Order();
 
@@ -57,16 +56,22 @@ public:
 class OrderHandler {
     void match(OrderPair order_pair);
 
-    OrderHandler() {}
+    OrderHandler();
 
 public:
-    using OrderList = vector<shared_ptr<Order>>;
+    using CompOrder = std::function<bool(const shared_ptr<Order>& v1,
+                                         const shared_ptr<Order>& val2)>;
+    using OrderList = std::priority_queue<shared_ptr<Order>,
+                                          std::vector<shared_ptr<Order>>,
+                                          CompOrder>;
     using UserMap   = map<string, vector<weak_ptr<Order>>>;
     using OrderMap  = map<std::string, OrderList>;
-    
+
     static std::shared_ptr<OrderHandler> get_instance();
 
     void add_order(const Order& order);
+
+    std::optional<std::reference_wrapper<OrderList>> get_order_list(OrderPair pair);
 
     std::optional<vector<Order>> get_orders_by_user(std::string user_id);
 
@@ -80,9 +85,10 @@ public:
     // }
 
 private:
-    mutex    mtx;
-    OrderMap order_map;
-    UserMap  users;
+    CompOrder comp_order;
+    mutex     mtx;
+    OrderMap  order_map;
+    UserMap   users;
 };
 
 #endif // ORDERHANDLER_H
