@@ -106,7 +106,7 @@ Response RequestHandler::add_order(Request req) {
     return resp;
 }
 
-
+/// ! Этот запрос очищает список ордеров, надо переписать. Использовался для отладки
 /// @example
 /// {
 ///     "source": "RUB",

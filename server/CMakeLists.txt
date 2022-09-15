@@ -2,11 +2,17 @@ cmake_minimum_required(VERSION 3.11)
 set(this server)
 project(${this})
 
-if(WIN32)
-    set (BOOST_ROOT "C:/boost_1_80_0/") # Путь к библиотеке Boost
+if(DEFINED BOOST_ROOT)
+    message("EEEEEEEEE!")
 else()
-    set (BOOST_ROOT "/home/fume/Downloads/boost_1_80_0")
+    message( FATAL_ERROR "BOOST_ROOT is not setted. Try flag -D BOOST_ROOT=<path to boost root>" )
 endif()
+# if(BOOST_ROOT)
+# if(WIN32)
+#     set (BOOST_ROOT "C:/boost_1_80_0/") # Путь к библиотеке Boost
+# else()
+#     set (BOOST_ROOT "/home/fume/Downloads/boost_1_80_0")
+# endif()
 
 
 set(CMAKE_CXX_STANDARD 17)
