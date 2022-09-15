@@ -7,7 +7,7 @@
 
 class User {
 public:
-    using BalanceMap  = std::map<std::string, double>;
+    using BalanceMap  = std::map<std::string, float>;
 
     User() = default;
     User(std::string user_id);
@@ -15,7 +15,7 @@ public:
     std::string get_user_id() const;
     double get_balance_by_curr(std::string currency) const;
     BalanceMap& get_balance();
-    void change_balance(std::string currency, double balance);
+    void change_balance(std::string currency, float balance);
 
 private:
     std::string user_id;
@@ -29,7 +29,6 @@ public:
 
     static UserHandler* get_instance();
     void add_user(const std::string& user_id);
-    void update_user(const User& user);
     std::optional<std::reference_wrapper<User>> get_user(const std::string& user_id);
     std::map<std::string, User> get_users();
 

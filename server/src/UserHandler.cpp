@@ -5,7 +5,7 @@
 using namespace std;
 
 User::User(std::string user_id) : user_id{user_id} {
-    balance = {{"RUB", 500.0}, {"USD", 500.0}};
+    balance = {{"RUB", 0}, {"USD", 0}};
 }
 
 double User::get_balance_by_curr(std::string currency) const{
@@ -20,12 +20,14 @@ User::BalanceMap& User::get_balance() {
     return balance;
 }
 
-void User::change_balance(std::string currency, double val) {
+void User::change_balance(std::string currency, float val) {
     try{
-        balance.at(currency) += val;
+        balance.at(currency)  += val;
     } catch (std::exception& e){
         balance.insert({currency, val});
     }
+
+    return;
 }
 
 std::string User::get_user_id() const{
@@ -45,15 +47,6 @@ void UserHandler::add_user(const std::string& user_id) {
     } else {
         users.insert({user_id, new_user});
         std::cout << "[INFO] user " << user_id << " added " << std::endl;
-    }
-}
-
-void UserHandler::update_user(const User& user) {
-    if (users.find(user.get_user_id()) != users.end()) {
-        std::cout << "[INFO] user " << user.get_user_id() << " updated " << std::endl;
-    } else {
-        std::cout << "[INFO] user " << user.get_user_id() << " not found "
-                  << std::endl;
     }
 }
 

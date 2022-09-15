@@ -69,6 +69,7 @@ httpparser::Response RequestHandler::add_user(httpparser::Request req) {
 ///     "user_id": "123123123",
 ///     "source": "RUB",
 ///     "target": "USD",
+///     "type": "BUY",
 ///     "value": 20,
 ///     "price": 61
 /// }
@@ -78,7 +79,7 @@ Response RequestHandler::add_order(Request req) {
     json  data = json::parse(req.content_as_str());
     try {
         order.user_id    = data.at("user_id");
-        order.order_pair = {data.at("source"), data.at("target")};
+        order.order_pair = {data.at("source"), data.at("target"), data.at("type")};
         order.value      = data.at("value");
         order.price      = data.at("price");
     } catch (std::exception& e) {
@@ -105,12 +106,20 @@ Response RequestHandler::add_order(Request req) {
     return resp;
 }
 
+
+/// @example
+/// {
+///     "source": "RUB",
+///     "target": "USD",
+///     "type": "SELL"
+/// }
 Response RequestHandler::get_orders(Request req) {
-    OrderPair pair;
+    OrderPairType pair;
     json   data = json::parse(req.content_as_str());
     try {
         pair.source = data.at("source");
         pair.target = data.at("target");
+        pair.type = data.at("type");
     } catch (std::exception& e) {
         std::cerr << e.what() << std::endl;
         Response resp;
@@ -155,6 +164,11 @@ Response RequestHandler::get_orders(Request req) {
     return resp;
 }
 
+
+/// @example
+/// {
+///     "user_id": "123123123"
+/// }
 Response RequestHandler::get_user_orders(Request req) {
     string user_id;
     json   data = json::parse(req.content_as_str());
@@ -208,6 +222,10 @@ Response RequestHandler::get_user_orders(Request req) {
     return resp;
 }
 
+/// @example
+/// {
+///     "user_id": "123123123"
+/// }
 httpparser::Response RequestHandler::get_userdetail(httpparser::Request req) {
     string user_id;
     json   data = json::parse(req.content_as_str());
@@ -232,13 +250,14 @@ httpparser::Response RequestHandler::get_userdetail(httpparser::Request req) {
     json body = {
         {"user_id", user_id},
     };
-    json balance_arr = json::array();
+    json balance_arr;
 
     for (const auto& bal: user->get().get_balance()) {
-        balance_arr.push_back({bal.first, bal.second});
+        // json one_note = json{
+        //     {bal.first, bal.second}
+        // };
+        body["balance"][bal.first] = bal.second;
     }
-
-    body["balance"] = balance_arr;
 
     Response resp;
     resp.statusCode = 200;

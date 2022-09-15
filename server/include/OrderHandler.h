@@ -21,17 +21,18 @@ using std::vector;
 using std::weak_ptr;
 // using std::tuple;
 
-class OrderPair {
+class OrderPairType {
 public:
     std::string source;
     std::string target;
+    std::string type; // SELL or BUY
 
-    friend bool operator==(const OrderPair& a, const OrderPair& b) {
-        return (a.source == b.source) && (a.target == b.target);
+    friend bool operator==(const OrderPairType& a, const OrderPairType& b) {
+        return (a.source == b.source) && (a.target == b.target) && (a.type) == (b.type);
     }
 
     operator string() const {
-        return source + "/" + target;
+        return source + "/" + target + "/" + type;
     }
 };
 
@@ -40,7 +41,7 @@ public:
     std::string user_id;
     float       price;
     float       value;
-    OrderPair   order_pair;
+    OrderPairType   order_pair;
 
     Order();
 
@@ -54,7 +55,7 @@ public:
 // using OrderPair = pair<string, string>;
 
 class OrderHandler {
-    void match(OrderPair order_pair);
+    void match(OrderPairType order_pair);
 
     OrderHandler();
 
@@ -71,7 +72,7 @@ public:
 
     void add_order(const Order& order);
 
-    std::optional<std::reference_wrapper<OrderList>> get_order_list(OrderPair pair);
+    std::optional<std::reference_wrapper<OrderList>> get_order_list(OrderPairType pair);
 
     std::optional<vector<Order>> get_orders_by_user(std::string user_id);
 
@@ -85,7 +86,8 @@ public:
     // }
 
 private:
-    CompOrder comp_order;
+    CompOrder comp_order_buy;
+    CompOrder comp_order_sell;
     mutex     mtx;
     OrderMap  order_map;
     UserMap   users;

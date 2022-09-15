@@ -38,6 +38,7 @@ std::string Order::serialize() const {
         {"user_id", user_id},
         {"source", order_pair.source},
         {"target", order_pair.target},
+        {"type", order_pair.type},
         {"value", value},
         {"price", price},
     };
@@ -46,8 +47,15 @@ std::string Order::serialize() const {
 }
 
 OrderHandler::OrderHandler() {
-    comp_order = [](const shared_ptr<Order>& v1, const shared_ptr<Order>& v2) {
-        bool res = (int)(v1->price*10000) < (int)(v2->price*10000) ;
+    comp_order_sell = [](const shared_ptr<Order>& v1,
+                         const shared_ptr<Order>& v2) {
+        bool res = (int)(v1->price * 10000) > (int)(v2->price * 10000);
+        return res;
+    };
+
+    comp_order_buy = [](const shared_ptr<Order>& v1,
+                        const shared_ptr<Order>& v2) {
+        bool res = (int)(v1->price * 10000) < (int)(v2->price * 10000);
         return res;
     };
 }
@@ -64,9 +72,12 @@ void OrderHandler::add_order(const Order& order) {
     try {
         order_map.at(order.order_pair).push(new_order);
     } catch (std::out_of_range&) {
-        OrderList pair_orders{comp_order};
-        pair_orders.push(new_order);
-        order_map.insert({order.order_pair, pair_orders});
+        if (order.order_pair.type == "BUY") {
+            order_map[order.order_pair] = OrderList(comp_order_buy);
+        } else {
+            order_map[order.order_pair] = OrderList(comp_order_sell);
+        }
+        order_map[order.order_pair].push(new_order);
     }
 
     weak_ptr<Order> new_order_weak = new_order;
@@ -82,12 +93,15 @@ void OrderHandler::add_order(const Order& order) {
     match(order.order_pair);
 }
 
-std::optional<std::reference_wrapper<OrderHandler::OrderList>> OrderHandler::get_order_list(OrderPair pair) {
-    try{
+[[deprecated]] std::optional<std::reference_wrapper<OrderHandler::OrderList>>
+    OrderHandler::get_order_list(OrderPairType pair) {
+    // TODO переписать или удалить. После каждого вызова очищает лист ордеров
+    try {
         return order_map.at(pair);
-    } catch (std::out_of_range&){
-        std::cout << "[INFO] pair not found: " << (std::string)(pair) << std::endl;
-    } catch (std::exception& e){
+    } catch (std::out_of_range&) {
+        std::cout << "[INFO] pair not found: " << (std::string)(pair)
+                  << std::endl;
+    } catch (std::exception& e) {
         std::cout << "[ERROR] " << e.what() << std::endl;
     }
 
@@ -118,58 +132,63 @@ std::optional<vector<Order>>
     }
 }
 
-void OrderHandler::match(OrderPair order_pair) {
+void OrderHandler::match(OrderPairType order_pair) {
     mtx.lock();
-    OrderList orders;
-    OrderList orders_reverse;
-    
-    try{
-        orders = order_map.at(order_pair);
-        auto tmp = orders.top();
-        std::swap(order_pair.source, order_pair.target);
-        orders_reverse = order_map.at(order_pair);
-    } catch (std::out_of_range&){
+
+    try {
+        order_pair.type        = "BUY";
+        OrderList& orders_buy  = order_map.at(order_pair);
+        order_pair.type        = "SELL";
+        OrderList& orders_sell = order_map.at(order_pair);
+
+        for (;!orders_sell.empty() && !orders_buy.empty();) {
+
+            auto order_buy  = orders_buy.top();
+            auto order_sell = orders_sell.top();
+
+            if (order_buy->price < order_sell->price) {
+                break;
+            }
+
+            float swaping_val =
+                std::min(order_buy.get()->value, order_sell.get()->value);
+
+            User& user_buy = UserHandler::get_instance()
+                                 ->get_user(order_buy.get()->user_id)
+                                 .value();
+
+            User& user_sell = UserHandler::get_instance()
+                                  ->get_user(order_sell.get()->user_id)
+                                  .value();
+
+            user_buy.change_balance(order_buy.get()->order_pair.target,
+                                    -swaping_val * order_buy.get()->price);
+
+            user_buy.change_balance(order_buy.get()->order_pair.source,
+                                    swaping_val);
+
+            user_sell.change_balance(order_sell.get()->order_pair.target,
+                                     swaping_val * order_buy.get()->price);
+
+            user_sell.change_balance(order_sell.get()->order_pair.source,
+                                     -swaping_val);
+
+            order_buy.get()->value -= swaping_val;
+            order_sell.get()->value -= swaping_val;
+
+            if (int(order_buy->value * 10000) == 0) {
+                 orders_buy.pop();
+            }
+            if (int(order_sell->value * 10000) == 0) {
+                 orders_sell.pop();
+            }
+        }
+    } catch (std::out_of_range&) {
         std::cout << "[INFO] pair not found" << std::endl;
-        
-        mtx.unlock();
-        return;
-    } catch (std::exception& e){
+    } catch (std::exception& e) {
         std::cout << "[WARN]: " << e.what() << std::endl;
-        
-        mtx.unlock();
-        return;
-    }
-
-    for (;!orders.empty() && !orders_reverse.empty(); orders.pop(), orders_reverse.pop()) {
-
-        auto order = orders.top();
-
-        auto order_reverse = orders_reverse.top();
-
-
-        double swaping_val =
-            std::abs(order.get()->value - order_reverse.get()->value);
-
-        User user = UserHandler::get_instance()
-                        ->get_user(order.get()->user_id)
-                        .value();
-
-        User user_reverse = UserHandler::get_instance()
-                                ->get_user(order_reverse.get()->user_id)
-                                .value();
-
-        user.change_balance(order.get()->order_pair.source,
-                            swaping_val * order.get()->price);
-
-        user.change_balance(order.get()->order_pair.target,
-                            swaping_val / order.get()->price);
-
-        user_reverse.change_balance(order.get()->order_pair.target,
-                                    swaping_val * order_reverse.get()->price);
-
-        user_reverse.change_balance(order.get()->order_pair.source,
-                                    swaping_val / order_reverse.get()->price);
     }
 
     mtx.unlock();
+    return;
 }
