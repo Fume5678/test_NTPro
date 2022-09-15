@@ -3,7 +3,7 @@ set(this server)
 project(${this})
 
 if(DEFINED BOOST_ROOT)
-    message("EEEEEEEEE!")
+    message("BOOST_ROOT: "${BOOST_ROOT})
 else()
     message( FATAL_ERROR "BOOST_ROOT is not setted. Try flag -D BOOST_ROOT=<path to boost root>" )
 endif()
