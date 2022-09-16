@@ -42,12 +42,15 @@ Response RequestHandler::route(Request request) {
 /// @example
 /// {
 ///     "user_id": "123123123"
+///     "password": "123456"
 /// }
 httpparser::Response RequestHandler::add_user(httpparser::Request req) {
-    string user_id;
+    std::string user_id;
+    std::string password;
     try {
         json   data = json::parse(req.content_as_str());
         user_id = data.at("user_id");
+        password = data.at("password");
     } catch (std::exception& e) {
         std::cerr << e.what() << std::endl;
         Response resp;
@@ -56,17 +59,24 @@ httpparser::Response RequestHandler::add_user(httpparser::Request req) {
         return resp;
     }
 
-    UserHandler::get_instance()->add_user(user_id);
+    std::string body = "User added";
+    if(UserHandler::get_instance()->get_user(user_id).has_value()) {
+        body = "User already exists";
+    } else {
+        UserHandler::get_instance()->add_user(User{user_id, password});
+    }
 
     Response resp;
     resp.statusCode = 200;
     resp.status     = "Ok";
+    resp.str_to_content(body);
     return resp;
 }
 
 /// @example
 /// {
 ///     "user_id": "123123123",
+///     "password": "123456",
 ///     "source": "RUB",
 ///     "target": "USD",
 ///     "type": "BUY",
@@ -76,12 +86,14 @@ httpparser::Response RequestHandler::add_user(httpparser::Request req) {
 Response RequestHandler::add_order(Request req) {
 
     Order order;
+    std::string password;
     json  data = json::parse(req.content_as_str());
     try {
         order.user_id    = data.at("user_id");
         order.order_pair = {data.at("source"), data.at("target"), data.at("type")};
         order.value      = data.at("value");
         order.price      = data.at("price");
+        password         = data.at("password");
     } catch (std::exception& e) {
         std::cerr << e.what() << std::endl;
         Response resp;
@@ -90,7 +102,7 @@ Response RequestHandler::add_order(Request req) {
         return resp;
     }
 
-    if (!UserHandler::get_instance()->verify_user(order.user_id)) {
+    if (!UserHandler::get_instance()->verify_user(User{order.user_id, password})) {
         Response resp;
         resp.statusCode = 403;
         resp.status     = "Unauthorized";
@@ -155,10 +167,7 @@ Response RequestHandler::get_orders(Request req) {
     resp.statusCode = 200;
     resp.status     = "Ok";
     Response::HeaderItem cont_type{"Content-Type", "application/json"};
-    Response::HeaderItem cont_len{"Content-Length",
-                                  std::to_string(sstr_body.str().length())};
     resp.headers.push_back(cont_type);
-    resp.headers.push_back(cont_len);
     resp.str_to_content(sstr_body.str());
 
     return resp;
@@ -168,12 +177,15 @@ Response RequestHandler::get_orders(Request req) {
 /// @example
 /// {
 ///     "user_id": "123123123"
+///     "password": "123456"
 /// }
 Response RequestHandler::get_user_orders(Request req) {
     string user_id;
+    string password;
     json   data = json::parse(req.content_as_str());
     try {
         user_id = data.at("user_id");
+        password = data.at("password");
     } catch (std::exception& e) {
         std::cerr << e.what() << std::endl;
         Response resp;
@@ -181,7 +193,7 @@ Response RequestHandler::get_user_orders(Request req) {
         resp.status     = "Bad Request";
         return resp;
     }
-    if (!UserHandler::get_instance()->verify_user(user_id)) {
+    if (!UserHandler::get_instance()->verify_user(User{user_id, password})) {
         Response resp;
         resp.statusCode = 403;
         resp.status     = "Unauthorized";
@@ -213,10 +225,7 @@ Response RequestHandler::get_user_orders(Request req) {
     resp.statusCode = 200;
     resp.status     = "Ok";
     Response::HeaderItem cont_type{"Content-Type", "application/json"};
-    Response::HeaderItem cont_len{"Content-Length",
-                                  std::to_string(sstr_body.str().length())};
     resp.headers.push_back(cont_type);
-    resp.headers.push_back(cont_len);
     resp.str_to_content(sstr_body.str());
 
     return resp;
@@ -224,13 +233,16 @@ Response RequestHandler::get_user_orders(Request req) {
 
 /// @example
 /// {
-///     "user_id": "123123123"
+///     "user_id":  "123123123"
+///     "password": "123456"
 /// }
 httpparser::Response RequestHandler::get_userdetail(httpparser::Request req) {
     string user_id;
+    string password;
     json   data = json::parse(req.content_as_str());
     try {
         user_id = data.at("user_id");
+        password = data.at("password");
     } catch (std::exception& e) {
         std::cerr << e.what() << std::endl;
         Response resp;
@@ -238,7 +250,7 @@ httpparser::Response RequestHandler::get_userdetail(httpparser::Request req) {
         resp.status     = "Bad Request";
         return resp;
     }
-    if (!UserHandler::get_instance()->verify_user(user_id)) {
+    if (!UserHandler::get_instance()->verify_user(User{user_id, password})) {
         Response resp;
         resp.statusCode = 403;
         resp.status     = "Unauthorized";
@@ -268,5 +280,37 @@ httpparser::Response RequestHandler::get_userdetail(httpparser::Request req) {
     resp.headers.push_back(cont_type);
     resp.headers.push_back(cont_len);
     resp.str_to_content(body.dump());
+    return resp;
+}
+
+/// @example
+/// {
+///     "user_id": "123123123"
+///     "password": "123456"
+/// }
+httpparser::Response RequestHandler::verify(httpparser::Request req) {
+    string user_id;
+    string password;
+    json   data = json::parse(req.content_as_str());
+    try {
+        user_id = data.at("user_id");
+        password = data.at("password");
+    } catch (std::exception& e) {
+        std::cerr << e.what() << std::endl;
+        Response resp;
+        resp.statusCode = 400;
+        resp.status     = "Bad Request";
+        return resp;
+    }
+    if (!UserHandler::get_instance()->verify_user(User{user_id, password})) {
+        Response resp;
+        resp.statusCode = 403;
+        resp.status     = "Unauthorized";
+        return resp;
+    }
+
+    Response resp;
+    resp.statusCode = 200;
+    resp.status     = "Ok";
     return resp;
 }

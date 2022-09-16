@@ -12,11 +12,12 @@ function add_order() {
     for (var i = 0; i < 15; i++) {
         let res = http.post('http://localhost:1234/api/add_order', JSON.stringify({
             user_id: parseInt(Math.random() * 2) == 1 ? "123123123" : "123123124",
+            password: '123456',
             source: "USD",
             target: "RUB",
             type: parseInt(Math.random() * 2) == 1 ? "SELL" : "BUY",
             value: i*20,
-            price: parseInt(Math.random() * 5) + 60
+            price: parseInt(Math.random() * 5) + 60,
         }),
             params
         );
@@ -67,6 +68,7 @@ export default function () {
 
     const payload = JSON.stringify({
         user_id: '123123123',
+        password: '123456'
     });
 
     const params = {
@@ -81,6 +83,7 @@ export default function () {
 
     const payload2 = JSON.stringify({
         user_id: '123123124',
+        password: '123456'
     }); 
 
     let res2 = http.post('http://localhost:1234/api/add_user', payload2, params);

@@ -78,8 +78,11 @@ struct Response {
     }
 
     void str_to_content(std::string str){
-        content.clear();
+        Response::HeaderItem cont_len{"Content-Length",
+                                  std::to_string(str.length())};
+        headers.push_back(cont_len);
 
+        content.clear();
         for(auto ch: str){
             content.push_back(ch);
         }

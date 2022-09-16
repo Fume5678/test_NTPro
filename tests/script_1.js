@@ -11,6 +11,7 @@ const params = {
 function user1() {
     let res = http.post('http://localhost:1234/api/add_order', JSON.stringify({
         user_id: "123123120",
+        password: '123456',
         source: "USD",
         target: "RUB",
         type: "BUY",
@@ -29,6 +30,7 @@ function user1() {
 function user2() {
     let res = http.post('http://localhost:1234/api/add_order', JSON.stringify({
         user_id: "123123121",
+        password: '123456',
         source: "USD",
         target: "RUB",
         type: "BUY",
@@ -47,6 +49,7 @@ function user2() {
 function user3() {
     let res = http.post('http://localhost:1234/api/add_order', JSON.stringify({
         user_id: "123123122",
+        password: '123456',
         source: "USD",
         target: "RUB",
         type: "SELL",
@@ -67,6 +70,7 @@ export default function () {
     for (var i = 0; i < 3; i++) {
         const payload = JSON.stringify({
             user_id: '12312312' + i,
+            password: '123456'
         });
 
 
@@ -82,6 +86,7 @@ export default function () {
 
     let userdetail_0 = JSON.parse(http.post('http://localhost:1234/api/get_userdetail', JSON.stringify({
         user_id: "123123120",
+        password: '123456'
     }),
         params
     ).body);
@@ -89,6 +94,7 @@ export default function () {
 
     let userdetail_1 = JSON.parse(http.post('http://localhost:1234/api/get_userdetail', JSON.stringify({
         user_id: "123123121",
+        password: '123456'
     }),
         params
     ).body);
@@ -96,6 +102,7 @@ export default function () {
 
     let userdetail_2 = JSON.parse(http.post('http://localhost:1234/api/get_userdetail', JSON.stringify({
         user_id: "123123122",
+        password: '123456'
     }),
         params
     ).body);    
@@ -126,6 +133,7 @@ export default function () {
 
     let user2_orders = JSON.parse(http.post('http://localhost:1234/api/get_user_orders', JSON.stringify({
         user_id: "123123122",
+        password: '123456'
     }),
         params
     ).body);

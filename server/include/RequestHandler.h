@@ -16,6 +16,7 @@ public:
     httpparser::Response get_orders(httpparser::Request req);
     httpparser::Response get_user_orders(httpparser::Request req);
     httpparser::Response get_userdetail(httpparser::Request req);
+    httpparser::Response verify(httpparser::Request req);
 };
 
 #endif // REQUESTHANDLER_H
