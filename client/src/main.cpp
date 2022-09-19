@@ -1,41 +1,51 @@
 /*
     Client
 */
+#include <boost/program_options/options_description.hpp>
+#include <boost/program_options/value_semantic.hpp>
+#include <boost/program_options/variables_map.hpp>
+#include <exception>
 #include <iostream>
-#include <boost/asio.hpp>
+#include <boost/program_options.hpp>
+#include <string>
 
-using namespace boost::asio;
-using ip::tcp;
-using std::string;
-using std::cout;
-using std::endl;
+// using namespace boost::asio;
+// using ip::tcp;
+// using std::string;
+// using std::cout;
+// using std::endl;
 
-int main() {
-    SetThreadUILanguage(MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US));
-     boost::asio::io_service io_service;
-//socket creation
-     tcp::socket socket(io_service);
-//connection
-     socket.connect( tcp::endpoint( boost::asio::ip::address::from_string("127.0.0.1"), 1234 ));
-// request/message from client
-     const string msg = "Hello from Client!\n";
-     boost::system::error_code error;
-     boost::asio::write( socket, boost::asio::buffer(msg), error );
-     if( !error ) {
-        cout << "Client sent hello message!" << endl;
-     }
-     else {
-        cout << "send failed: " << error.message() << endl;
-     }
- // getting response from server
-    boost::asio::streambuf receive_buffer;
-    boost::asio::read(socket, receive_buffer, boost::asio::transfer_all(), error);
-    if( error && error != boost::asio::error::eof ) {
-        cout << "receive failed: " << error.message() << endl;
+namespace po = boost::program_options;
+
+int main(int ac, char** av) {
+    po::options_description desc("User auth");
+    desc.add_options()
+        ("help", "produce help message")
+        ("user,u", po::value<std::string>(), "username for sign in")
+        ("add-user,U", po::value<std::string>(), "username for sign up")
+        ("pass,p", po::value<std::string>(), "user password")
+    ;
+    po::variables_map vm;
+
+    try{
+        po::store(po::parse_command_line(ac, av, desc), vm);
+        po::notify(vm);
+
+        if(vm.count("help")){
+            std::cout << desc << "\n";
+            //std::cout << "Example auth:\n client -u nickname -p password\n";
+            return 1;
+        } 
+
+        if(vm.count("user") && vm.count("pass")){
+            std::cout << "User: " << vm["user"].as<std::string>() << " " << vm["pass"].as<std::string>();
+        } else if(vm.count("add-user") && vm.count("pass")){
+            std::cout << "User: " << vm["add-user"].as<std::string>() << " " << vm["pass"].as<std::string>();
+        }
+    } catch(std::exception&){
+        std::cout << "Unrecongized. Try --help\n";
+        return 1;
     }
-    else {
-        const char* data = boost::asio::buffer_cast<const char*>(receive_buffer.data());
-        cout << data << endl;
-    }
+
     return 0;
 }

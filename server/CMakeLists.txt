@@ -4,6 +4,8 @@ project(${this})
 
 if(DEFINED BOOST_ROOT)
     message("BOOST_ROOT is defined as ${BOOST_ROOT}")
+elseif(DEFINED ENV{BOOST_ROOT})
+    message("BOOST_ROOT is defined from env as ${BOOST_ROOT}")
 else()
     message( FATAL_ERROR "BOOST_ROOT is not setted. Try flag -D BOOST_ROOT=<path to boost root>" )
 endif()
