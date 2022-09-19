@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.11)
 set(this client)
 project(${this})
 
+set(BOOST_ROOT /home/fume/Downloads/boost_1_80_0)
+
 if(DEFINED BOOST_ROOT)
     message("BOOST_ROOT is defined as ${BOOST_ROOT}")
 elseif(DEFINED ENV{BOOST_ROOT})
