@@ -5,10 +5,12 @@
 #include <optional>
 #include <iostream>
 #include <vector>
+#include <map>
 
 using std::optional;
 using std::string;
 using std::vector;
+using std::map;
 
 class User;
 class Order;
@@ -38,7 +40,7 @@ class User {
 public:
     string           user_id;
     optional<string> password;
-    vector<Order>    orders;
+    map<string, float>    balance;
 };
 
 #endif // MODELS_H

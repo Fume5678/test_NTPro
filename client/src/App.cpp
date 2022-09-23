@@ -108,7 +108,18 @@ void App::run() {
                 }
             }
             else if(cmd == "/u"){
-                std::cout << " Current user: " << data.user_id << std::endl;
+
+                auto userdetail = requests.POST_get_userdetail(User{data.user_id, data.password});
+                if(userdetail.has_value()){
+                    std::cout << "Current user: " << userdetail.value().user_id << std::endl;
+                    std::cout << "Balance:\n";
+                    for(const auto& currency: userdetail.value().balance){
+                        std::cout << " {" <<  currency.first << " : " << currency.second << "}" << std::endl;
+                    }
+                } else {
+                    std::cout << "[WARN] User not found" << std::endl;
+                }
+                
             } else {
                 throw std::invalid_argument("Unrecognized command. Try /? for help");
             }

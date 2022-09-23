@@ -21,6 +21,7 @@ public:
     bool POST_add_order(Order order, std::string password);
     bool POST_verify_user(User user);
     std::string POST_add_user(User user);
+    std::optional<User> POST_get_userdetail(User user);
     std::vector<Order> POST_get_orders(User user);
 
 private:

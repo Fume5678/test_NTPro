@@ -22,7 +22,7 @@ httpparser::Response Requests::do_request(httpparser::Request req) {
 
     boost::system::error_code error;
     std::string buf = req.serialize();
-    std::cerr << "[INFO] request: " << buf << std::endl;
+    //std::cerr << "[INFO] request: " << buf << std::endl;
     auto buffer_tmp = boost::asio::buffer(buf);
     boost::asio::write(socket, buffer_tmp, error);
     if (error) {
@@ -39,7 +39,7 @@ httpparser::Response Requests::do_request(httpparser::Request req) {
 
         string data{c_data};
 
-        std::cerr << "[INFO] responce: " << data << std::endl;
+        //std::cerr << "[INFO] responce: " << data << std::endl;
 
         httpparser::HttpResponseParser parser; 
         int res = parser.parse(
@@ -74,6 +74,42 @@ std::string Requests::POST_add_user(User user) {
     return res;
 }
 
+std::optional<User> Requests::POST_get_userdetail(User user) {
+    httpparser::Request req; 
+    req.uri = "/api/get_userdetail";
+    req.method = "POST";
+
+    nlohmann::json body = {
+        {"user_id", user.user_id},
+        {"password", user.password.value()},
+    };
+
+    httpparser::Request::HeaderItem cont_type{"Content-Type", "application/json"};
+    req.headers.push_back(cont_type);
+    req.str_to_content(body.dump());
+
+    try{
+        auto resp_body = nlohmann::json::parse(do_request(req).content_as_str());
+        User res_user;
+        res_user.user_id = resp_body.at("user_id").get<string>();
+        res_user.password = {};        
+
+        if(resp_body.count("balance")){
+            for(const auto& currency : resp_body.at("balance").get<std::map<string, float>>()) {
+                string key = currency.first;
+                float val = currency.second;
+
+                res_user.balance[key] = val;
+            }
+        }
+
+        return res_user;
+    } catch(std::exception& e) {
+        std::cerr << "[ERROR] Bad response userdetails: " << e.what() << std::endl;
+        return std::nullopt;
+    }
+}
+
 bool Requests::POST_add_order(Order order, std::string password) {
     httpparser::Request req; 
     req.uri = "/api/add_order";
@@ -96,7 +132,7 @@ bool Requests::POST_add_order(Order order, std::string password) {
 
     httpparser::Response resp = do_request(req);
     if(resp.statusCode == 200){
-        cerr << "[INFO] Order added" << endl;
+        cerr << "Order added" << endl;
         return true;
     } else {
         cerr << "[ERROR] Order not added: " << resp.statusCode << " "
