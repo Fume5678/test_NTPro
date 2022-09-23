@@ -24,6 +24,16 @@ Run server
     ./server/server
 ```
 
+Use client
+```
+    # Create user 
+    ./client/client -U <nickname> -p <password>
+
+    # Login 
+    ./client/client -u <nickname> -p <password>
+```
+
+
 ## Api сервера 
 
 **[POST] /api/add_user** — Добавление пользователя
@@ -33,7 +43,8 @@ Content-Type: application/json
 _Пример запроса_
 ```
 {
-    "user_id": "123123123"
+    "user_id": "123123123",
+    "password": "123"
 }
 ```
 ---
@@ -45,6 +56,7 @@ _Пример запроса:_
 ```
 {
     "user_id": "123123123",
+    "password": "123"
     "source": "RUB",
     "target": "USD",
     "type": "BUY",
@@ -60,7 +72,8 @@ Content-Type: application/json
 _Пример запроса:_
 ```
 {
-    "user_id": "123123123"
+    "user_id": "123123123",
+    "password": "123"
 }
 ```
 ---
@@ -71,6 +84,19 @@ Content-Type: application/json
 _Пример запроса:_
 ```
 {
-    "user_id": "123123123"
+    "user_id": "123123123",
+    "password": "123"
+}
+```
+---
+**[POST] /api/verify_user** — Проверяет правильность введенных данных логина
+
+Content-Type: application/json
+
+_Пример запроса:_
+```
+{
+    "user_id": "123123123",
+    "password": "123"
 }
 ```
