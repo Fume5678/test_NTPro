@@ -15,7 +15,7 @@ namespace httpparser
 
 struct Request {
     Request()
-        : versionMajor(0), versionMinor(0), keepAlive(false)
+        : versionMajor(1), versionMinor(1), keepAlive(false)
     {}
     
     struct HeaderItem
@@ -36,19 +36,37 @@ struct Request {
     {
         std::stringstream stream;
         stream << method << " " << uri << " HTTP/"
-               << versionMajor << "." << versionMinor << "\n";
+               << versionMajor << "." << versionMinor << std::endl;
 
         for(std::vector<Request::HeaderItem>::const_iterator it = headers.begin();
             it != headers.end(); ++it)
         {
-            stream << it->name << ": " << it->value << "\n";
+            stream << it->name << ": " << it->value << std::endl;
         }
 
         std::string data(content.begin(), content.end());
         stream << data << "\n";
-        stream << "+ keep-alive: " << keepAlive << "\n";;
         return stream.str();
     }
+
+    std::string serialize() const
+    {
+        std::stringstream stream;
+        stream << method << " " << uri << " HTTP/"
+               << versionMajor << "." << versionMinor << "\r\n";
+
+        for(std::vector<Request::HeaderItem>::const_iterator it = headers.begin();
+            it != headers.end(); ++it)
+        {
+            stream << it->name << ": " << it->value << "\r\n";
+        }
+
+        std::string data(content.begin(), content.end());
+        stream << "\r\n" << data;
+        stream << "\r\n";
+        return stream.str();
+    }
+
 
     std::string content_as_str(){
         std::string str;
@@ -59,6 +77,18 @@ struct Request {
         
         return str;
     }
+
+    void str_to_content(std::string str){
+        Request::HeaderItem cont_len{"Content-Length",
+                                  std::to_string(str.length())};
+        headers.push_back(cont_len);
+
+        content.clear();
+        for(auto ch: str){
+            content.push_back(ch);
+        }
+    }
+    
 };
 
 } // namespace httpparser

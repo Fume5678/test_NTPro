@@ -1,22 +1,24 @@
-#include "Models.h"
-#include <App.h>
 #include <exception>
 #include <iostream>
 #include <exception>
 #include <stdexcept>
 #include <string>
 
+#include <Models.h>
+#include <Requests.h>
+#include <App.h>
+
 using namespace std;
 
-
-AppData::AppData(std::string user_id, std::string password)
+AppData::AppData(string user_id, string password, string server_addr)
     : user_id{user_id},
-      password{password}
+      password{password},
+      server_addr{server_addr}
 {}
 
-App::App() : data{"", ""} {}
+App::App() : data{"", "", ""}, requests("") {}
 
-App::App(AppData data): data(data) {}
+App::App(AppData data) : data(data), requests(data.server_addr) {}
 
 void App::print_help(std::string command = "") {
     if(command == ""){
@@ -87,8 +89,25 @@ void App::run() {
             } else if(cmd == "/ao"){
                 if(params.count("help")){
                     print_help(cmd);
+                } else {
+                    Order order;
+                    order.user_id = data.user_id;
+                    order.source  = params.at("source");
+                    order.target  = params.at("target");
+                    order.type    = params.at("type");
+                    order.value   = stod(params.at("value"));
+                    order.price   = stod(params.at("price"));
+
+                    requests.POST_add_order(order, data.password);
                 }
-            } else if(cmd == "/u"){
+            }else if(cmd == "/go"){
+                auto orders = requests.POST_get_orders(User{data.user_id, data.password});
+
+                for(auto& order : orders){
+                    std::cout << order << std::endl;
+                }
+            }
+            else if(cmd == "/u"){
                 std::cout << " Current user: " << data.user_id << std::endl;
             } else {
                 throw std::invalid_argument("Unrecognized command. Try /? for help");

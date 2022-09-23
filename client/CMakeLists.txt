@@ -30,6 +30,6 @@ if (Boost_FOUND)
     include_directories (SYSTEM ${Boost_INCLUDE_DIR}) # подключаем заголовочные файлы
     add_executable (${this} ${SOURCES} ${HEADERS}) # Создаем исполняемый файл для нашего проекта
     target_link_libraries (${this} ${Boost_LIBRARIES}) # подключаем библиотеку
-    target_include_directories(${this} PRIVATE ${ROOT_PATH}/external/)
+    target_include_directories(${this} PRIVATE ../external/)
     target_include_directories(${this} PRIVATE "include/")
 endif ()

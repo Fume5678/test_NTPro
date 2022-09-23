@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.11)
 set(this server)
 project(${this})
 
-set(BOOST_ROOT /home/fume/Downloads/boost_1_80_0)
+set(BOOST_ROOT /home/fume/projects/cpp/boost_1_80_0)
 
 if(DEFINED BOOST_ROOT)
     message("BOOST_ROOT is defined as ${BOOST_ROOT}")
@@ -30,6 +30,6 @@ if (Boost_FOUND)
     include_directories (SYSTEM ${Boost_INCLUDE_DIR}) # подключаем заголовочные файлы
     add_executable (${this} ${SOURCES} ${HEADERS}) # Создаем исполняемый файл для нашего проекта
     target_link_libraries (${this} ${Boost_LIBRARIES}) # подключаем библиотеку
-    target_include_directories(${this} PRIVATE ${ROOT_PATH}/external/)
+    target_include_directories(${this} PRIVATE ../external/)
     target_include_directories(${this} PRIVATE "include/")
 endif ()

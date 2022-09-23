@@ -54,16 +54,16 @@ struct Response {
     {
         std::stringstream stream;
         stream << "HTTP/" << versionMajor << "." << versionMinor
-               << " " << statusCode << " " << status << std::endl;
+               << " " << statusCode << " " << status << "\r\n";
 
         for(std::vector<Response::HeaderItem>::const_iterator it = headers.begin();
             it != headers.end(); ++it)
         {
-            stream << it->name << ": " << it->value << std::endl;
+            stream << it->name << ": " << it->value << "\r\n";
         }
 
         std::string data(content.begin(), content.end());
-        stream << std::endl << data;
+        stream << "\r\n" << data;
         return stream.str();
     }
 

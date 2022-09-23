@@ -13,7 +13,7 @@ tcp::socket& ConHandler::socket() {
     return sock;
 }
 
-void ConHandler::start() {
+void ConHandler::start() {                                          
     sock.async_read_some(
         boost::asio::buffer(buffer, max_length),
         boost::bind(&ConHandler::handle_read,
@@ -26,7 +26,7 @@ void ConHandler::handle_read(const boost::system::error_code& err,
                              size_t bytes_transferred) {
     request_msg = buffer;
     if (!err) {
-        cout << "[INFO] Request: " << request_msg << endl << endl;
+        cout << "[INFO] Request:\n" << request_msg << endl << endl;
     } else {
         std::cerr << "[ERROR]: " << err.message() << endl << endl;
         sock.close();
@@ -37,15 +37,7 @@ void ConHandler::handle_read(const boost::system::error_code& err,
     httpparser::HttpRequestParser::ParseResult res = parser.parse(request, buffer, buffer + 1024);
 
     if( res == httpparser::HttpRequestParser::ParsingCompleted )
-    {
-        std::cout << request.inspect() << std::endl;
-        std::cout << request.uri << std::endl;
-
-        for(auto ch : request.content){
-            std::cout << ch ;
-        }
-        std::cout << endl;
-        
+    {     
         response_msg = req_handler.get_response(request);
     } else {
         response_msg = "HTTP/1.1 400 BadRequest\r\n\r\n";

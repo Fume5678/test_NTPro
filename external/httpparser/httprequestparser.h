@@ -6,6 +6,7 @@
 #ifndef HTTPPARSER_REQUESTPARSER_H
 #define HTTPPARSER_REQUESTPARSER_H
 
+#include <iostream>
 #include <algorithm>
 
 #include <string.h>
@@ -60,6 +61,7 @@ private:
             case RequestMethodStart:
                 if( !isChar(input) || isControl(input) || isSpecial(input) )
                 {
+                    std::cout << "1";
                     return ParsingError;
                 }
                 else
@@ -75,6 +77,7 @@ private:
                 }
                 else if( !isChar(input) || isControl(input) || isSpecial(input) )
                 {
+                    std::cout << "2";
                     return ParsingError;
                 }
                 else
@@ -85,6 +88,7 @@ private:
             case RequestUriStart:
                 if( isControl(input) )
                 {
+                    std::cout << "3";
                     return ParsingError;
                 }
                 else
@@ -107,6 +111,7 @@ private:
                 }
                 else if( isControl(input) )
                 {
+                    std::cout << "4";
                     return ParsingError;
                 }
                 else
@@ -121,6 +126,7 @@ private:
                 }
                 else
                 {
+                    std::cout << "5";
                     return ParsingError;
                 }
                 break;
@@ -131,6 +137,7 @@ private:
                 }
                 else
                 {
+                    std::cout << "6";
                     return ParsingError;
                 }
                 break;
@@ -141,6 +148,7 @@ private:
                 }
                 else
                 {
+                    std::cout << "7";
                     return ParsingError;
                 }
                 break;
@@ -151,6 +159,7 @@ private:
                 }
                 else
                 {
+                    std::cout << "8";
                     return ParsingError;
                 }
                 break;
@@ -163,6 +172,7 @@ private:
                 }
                 else
                 {
+                    std::cout << "9";
                     return ParsingError;
                 }
                 break;
@@ -174,6 +184,7 @@ private:
                 }
                 else
                 {
+                    std::cout << "10";
                     return ParsingError;
                 }
                 break;
@@ -188,6 +199,7 @@ private:
                 }
                 else
                 {
+                    std::cout << "11";
                     return ParsingError;
                 }
                 break;
@@ -199,6 +211,7 @@ private:
                 }
                 else
                 {
+                    std::cout << "12";
                     return ParsingError;
                 }
                 break;
@@ -223,6 +236,7 @@ private:
                 }
                 else
                 {
+                    std::cout << "14";
                     return ParsingError;
                 }
                 break;
@@ -237,6 +251,7 @@ private:
                 }
                 else if( !isChar(input) || isControl(input) || isSpecial(input) )
                 {
+                    std::cout << "15";
                     return ParsingError;
                 }
                 else
@@ -258,6 +273,7 @@ private:
                 }
                 else if( isControl(input) )
                 {
+                    std::cout << "16";
                     return ParsingError;
                 }
                 else
@@ -273,6 +289,7 @@ private:
                 }
                 else if( !isChar(input) || isControl(input) || isSpecial(input) )
                 {
+                    std::cout << "17";
                     return ParsingError;
                 }
                 else
@@ -287,6 +304,7 @@ private:
                 }
                 else
                 {
+                    std::cout << "18";
                     return ParsingError;
                 }
                 break;
@@ -312,6 +330,7 @@ private:
                 }
                 else if( isControl(input) )
                 {
+                    std::cout << "19";
                     return ParsingError;
                 }
                 else
@@ -326,6 +345,7 @@ private:
                 }
                 else
                 {
+                    std::cout << "20";
                     return ParsingError;
                 }
                 break;
@@ -359,8 +379,10 @@ private:
                 {
                     if( input == '\n')
                         return ParsingCompleted;
-                    else
+                    else{
+                        std::cout << "21";
                         return ParsingError;
+                    }
                 }
                 else
                 {
@@ -392,6 +414,7 @@ private:
                 }
                 else
                 {
+                    std::cout << "22";
                     return ParsingError;
                 }
                 break;
@@ -410,6 +433,7 @@ private:
                 }
                 else
                 {
+                    std::cout << "23";
                     return ParsingError;
                 }
                 break;
@@ -424,6 +448,7 @@ private:
                 }
                 else
                 {
+                    std::cout << "24";
                     return ParsingError;
                 }
                 break;
@@ -441,6 +466,7 @@ private:
                 }
                 else
                 {
+                    std::cout << "25";
                     return ParsingError;
                 }
                 break;
@@ -455,6 +481,7 @@ private:
                 }
                 else
                 {
+                    std::cout << "26";
                     return ParsingError;
                 }
                 break;
@@ -465,6 +492,7 @@ private:
                 }
                 else
                 {
+                    std::cout << "27";
                     return ParsingError;
                 }
                 break;
@@ -479,6 +507,7 @@ private:
                 }
                 else
                 {
+                    std::cout << "28";
                     return ParsingError;
                 }
                 break;
@@ -493,6 +522,7 @@ private:
                 }
                 else
                 {
+                    std::cout << "29";
                     return ParsingError;
                 }
                 break;
@@ -511,6 +541,7 @@ private:
                 }
                 else
                 {
+                    std::cout << "30";
                     return ParsingError;
                 }
                 break;
@@ -521,11 +552,14 @@ private:
                 }
                 else
                 {
+                    std::cout << "31";
                     return ParsingError;
                 }
                 break;
-            default:
+            default:{
+                std::cout << "32";
                 return ParsingError;
+                }
             }
         }
 

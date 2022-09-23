@@ -114,12 +114,12 @@ std::optional<vector<Order>>
     try {
         vector<Order> orders;
 
-        for (auto it = users.at(user_id).begin(); it != users.at(user_id).end();
-             it++) {
-            if ((*it).expired()) {
+        for (auto it = users.at(user_id).begin(); it != users.at(user_id).end();) {
+            if (it->expired()) {
                 users.at(user_id).erase(it);
             } else {
                 orders.push_back(*(*it).lock().get());
+                it++;
             }
         }
 

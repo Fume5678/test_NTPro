@@ -3,6 +3,7 @@
 
 #include <map>
 #include <string>
+
 #include <Models.h>
 #include <Requests.h>
 
@@ -10,9 +11,10 @@ class AppData{
 public:
     std::string user_id;
     std::string password;
+    std::string server_addr;
 
     AppData() = default;
-    AppData(std::string user_id, std::string password);
+    AppData(std::string user_id, std::string password, std::string server_addr);
 };
 
 class App {

@@ -20,6 +20,9 @@ Response RequestHandler::route(Request request) {
     if (url == std::tuple("POST", "/api/add_user")) {
         return add_user(request);
     }
+    if (url == std::tuple("POST", "/api/verify_user")) {
+        return verify(request);
+    }
     if (url == std::tuple("POST", "/api/add_order")) {
         return add_order(request);
     }
@@ -87,8 +90,8 @@ Response RequestHandler::add_order(Request req) {
 
     Order order;
     std::string password;
-    json  data = json::parse(req.content_as_str());
     try {
+        json  data = json::parse(req.content_as_str());
         order.user_id    = data.at("user_id");
         order.order_pair = {data.at("source"), data.at("target"), data.at("type")};
         order.value      = data.at("value");
@@ -127,8 +130,8 @@ Response RequestHandler::add_order(Request req) {
 /// }
 Response RequestHandler::get_orders(Request req) {
     OrderPairType pair;
-    json   data = json::parse(req.content_as_str());
     try {
+        json   data = json::parse(req.content_as_str());
         pair.source = data.at("source");
         pair.target = data.at("target");
         pair.type = data.at("type");
@@ -182,8 +185,8 @@ Response RequestHandler::get_orders(Request req) {
 Response RequestHandler::get_user_orders(Request req) {
     string user_id;
     string password;
-    json   data = json::parse(req.content_as_str());
     try {
+        json   data = json::parse(req.content_as_str());
         user_id = data.at("user_id");
         password = data.at("password");
     } catch (std::exception& e) {
@@ -239,8 +242,8 @@ Response RequestHandler::get_user_orders(Request req) {
 httpparser::Response RequestHandler::get_userdetail(httpparser::Request req) {
     string user_id;
     string password;
-    json   data = json::parse(req.content_as_str());
     try {
+        json   data = json::parse(req.content_as_str());
         user_id = data.at("user_id");
         password = data.at("password");
     } catch (std::exception& e) {
@@ -291,8 +294,8 @@ httpparser::Response RequestHandler::get_userdetail(httpparser::Request req) {
 httpparser::Response RequestHandler::verify(httpparser::Request req) {
     string user_id;
     string password;
-    json   data = json::parse(req.content_as_str());
     try {
+        json   data = json::parse(req.content_as_str());
         user_id = data.at("user_id");
         password = data.at("password");
     } catch (std::exception& e) {
