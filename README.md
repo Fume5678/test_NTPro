@@ -16,7 +16,7 @@
     mkdir build
     cd build 
     cmake ..  -D BOOST_ROOT=<path to bost root folder>
-    make
+    cmake --build .
 ```
 
 Run server
