@@ -24,8 +24,6 @@ FILE(GLOB_RECURSE SOURCES "src/*.cpp")
 FILE(GLOB_RECURSE HEADERS "include/*.h")
 
 if (Boost_FOUND) 
-    message("Headers: " ${HEADERS})
-    message("Sources: " ${SOURCES})
     include_directories (SYSTEM ${Boost_INCLUDE_DIR}) # подключаем заголовочные файлы
     add_executable (${this} ${SOURCES} ${HEADERS}) # Создаем исполняемый файл для нашего проекта
     target_link_libraries (${this} ${Boost_LIBRARIES}) # подключаем библиотеку

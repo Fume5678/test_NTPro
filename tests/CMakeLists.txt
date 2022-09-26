@@ -19,9 +19,25 @@ FetchContent_MakeAvailable(googletest)
 ## Add your test files here
 enable_testing()
 
-add_executable(order_handler "./cmake_tests/order_handler.cpp")
+macro( add_recursive dir retVal)
+    # Store unfiltered list of files into temporary list
+    file( GLOB_RECURSE _tmp_list ${dir}/*.h ${dir}/*.cpp ${dir}/*.c ${dir}/*.inl )
+    # Resulted list is initially empty. Copy all needed elements into it.
+    set(${retVal})
+    foreach(f ${_tmp_list})
+        if(NOT f MATCHES "main.")
+            list(APPEND ${retVal} ${f})
+        endif()
+    endforeach()
+endmacro()
 
-target_link_libraries(order_handler gtest_main)
+add_recursive("../server/src/" srcs)
+message("RES: "  ${srcs})
+
+add_executable(server_tests "./cmake_tests/server_tests.cpp" ${srcs})
+target_include_directories(server_tests PRIVATE "../external/")
+target_include_directories(server_tests PRIVATE "../server/include/")
+target_link_libraries(server_tests gtest_main)
 
 include(GoogleTest)
-gtest_discover_tests(order_handler)
+gtest_discover_tests(server_tests)

@@ -9,14 +9,14 @@ using namespace nlohmann;
 
 Order::Order() {
     user_id    = "";
-    order_pair = {"", ""};
+    order_pair_type = {"", ""};
     value      = 0.0;
     price      = 0.0;
 }
 
 Order::Order(const Order& other) {
     this->user_id    = other.user_id;
-    this->order_pair = other.order_pair;
+    this->order_pair_type = other.order_pair_type;
     this->value      = other.value;
     this->price      = other.price;
 }
@@ -27,7 +27,7 @@ Order& Order::operator=(const Order& other) {
     }
 
     this->user_id    = other.user_id;
-    this->order_pair = other.order_pair;
+    this->order_pair_type = other.order_pair_type;
     this->value      = other.value;
     this->price      = other.price;
     return *this;
@@ -36,9 +36,9 @@ Order& Order::operator=(const Order& other) {
 std::string Order::serialize() const {
     auto res = json{
         {"user_id", user_id},
-        {"source", order_pair.source},
-        {"target", order_pair.target},
-        {"type", order_pair.type},
+        {"source", order_pair_type.source},
+        {"target", order_pair_type.target},
+        {"type", order_pair_type.type},
         {"value", value},
         {"price", price},
     };
@@ -67,17 +67,16 @@ std::shared_ptr<OrderHandler> OrderHandler::get_instance() {
 
 void OrderHandler::add_order(const Order& order) {
     mtx.lock();
-    // TODO добавить сортировку по цене при добавлении
     shared_ptr<Order> new_order = std::make_shared<Order>(order);
     try {
-        order_map.at(order.order_pair).push(new_order);
+        order_map.at(order.order_pair_type).push(new_order);
     } catch (std::out_of_range&) {
-        if (order.order_pair.type == "BUY") {
-            order_map[order.order_pair] = OrderList(comp_order_buy);
+        if (order.order_pair_type.type == "BUY") {
+            order_map[order.order_pair_type] = OrderList(comp_order_buy);
         } else {
-            order_map[order.order_pair] = OrderList(comp_order_sell);
+            order_map[order.order_pair_type] = OrderList(comp_order_sell);
         }
-        order_map[order.order_pair].push(new_order);
+        order_map[order.order_pair_type].push(new_order);
     }
 
     weak_ptr<Order> new_order_weak = new_order;
@@ -90,11 +89,11 @@ void OrderHandler::add_order(const Order& order) {
     }
     mtx.unlock();
 
-    match(order.order_pair);
+    match(order.order_pair_type);
 }
 
 [[deprecated]] std::optional<std::reference_wrapper<OrderHandler::OrderList>>
-    OrderHandler::get_order_list(OrderPairType pair) {
+    OrderHandler::get_orders_by_pair(OrderPairType pair) {
     // TODO переписать или удалить. После каждого вызова очищает лист ордеров
     try {
         return order_map.at(pair);
@@ -153,26 +152,34 @@ void OrderHandler::match(OrderPairType order_pair) {
             float swaping_val =
                 std::min(order_buy.get()->value, order_sell.get()->value);
 
-            User& user_buy = UserHandler::get_instance()
-                                 ->get_user(order_buy.get()->user_id)
-                                 .value();
+            try{
+                User& user_buy = UserHandler::get_instance()
+                                    ->get_user(order_buy.get()->user_id)
+                                    .value();
 
-            User& user_sell = UserHandler::get_instance()
-                                  ->get_user(order_sell.get()->user_id)
-                                  .value();
+                User& user_sell = UserHandler::get_instance()
+                                    ->get_user(order_sell.get()->user_id)
+                                    .value();
+                
 
-            user_buy.change_balance(order_buy.get()->order_pair.target,
+
+
+            user_buy.change_balance(order_buy.get()->order_pair_type.target,
                                     -swaping_val * order_buy.get()->price);
 
-            user_buy.change_balance(order_buy.get()->order_pair.source,
+            user_buy.change_balance(order_buy.get()->order_pair_type.source,
                                     swaping_val);
 
-            user_sell.change_balance(order_sell.get()->order_pair.target,
+            user_sell.change_balance(order_sell.get()->order_pair_type.target,
                                      swaping_val * order_buy.get()->price);
 
-            user_sell.change_balance(order_sell.get()->order_pair.source,
+            user_sell.change_balance(order_sell.get()->order_pair_type.source,
                                      -swaping_val);
 
+            } catch (std::exception& e){
+                std::cerr << "[ERROR] user of order not found\n";
+                break;
+            }
             order_buy.get()->value -= swaping_val;
             order_sell.get()->value -= swaping_val;
 

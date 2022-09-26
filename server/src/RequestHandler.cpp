@@ -93,7 +93,7 @@ Response RequestHandler::add_order(Request req) {
     try {
         json  data = json::parse(req.content_as_str());
         order.user_id    = data.at("user_id");
-        order.order_pair = {data.at("source"), data.at("target"), data.at("type")};
+        order.order_pair_type = {data.at("source"), data.at("target"), data.at("type")};
         order.value      = data.at("value");
         order.price      = data.at("price");
         password         = data.at("password");
@@ -144,7 +144,7 @@ Response RequestHandler::get_orders(Request req) {
     }
 
     auto opt_orders =
-        OrderHandler::get_instance().get()->get_order_list(pair);
+        OrderHandler::get_instance().get()->get_orders_by_pair(pair);
 
     int count = 0;
     std::stringstream sstr_body;

@@ -15,7 +15,7 @@ public:
 
     std::string get_user_id() const;
     std::string get_password() const;
-    double get_balance_by_curr(std::string currency) const;
+    float get_balance_by_curr(std::string currency) const;
     BalanceMap& get_balance();
     void change_balance(std::string currency, float balance);
 
@@ -31,6 +31,7 @@ private:
 
 
 class UserHandler {
+    UserHandler() = default;
 public:
     using UserMap = std::map<std::string, User>;
 

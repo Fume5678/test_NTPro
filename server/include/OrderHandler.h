@@ -41,7 +41,7 @@ public:
     std::string user_id;
     float       price;
     float       value;
-    OrderPairType   order_pair;
+    OrderPairType   order_pair_type;
 
     Order();
 
@@ -55,7 +55,7 @@ public:
 // using OrderPair = pair<string, string>;
 
 class OrderHandler {
-    void match(OrderPairType order_pair);
+    void match(OrderPairType order_pair_type);
 
     OrderHandler();
 
@@ -72,18 +72,9 @@ public:
 
     void add_order(const Order& order);
 
-    std::optional<std::reference_wrapper<OrderList>> get_order_list(OrderPairType pair);
+    std::optional<std::reference_wrapper<OrderList>> get_orders_by_pair(OrderPairType pair);
 
     std::optional<vector<Order>> get_orders_by_user(std::string user_id);
-
-    // std::optional<const OrderList&>
-    //     get_orders_by_pairs(OrderPair order_pair) const{
-    //     try {
-    //         return std::optional{order_map.at(order_pair)};
-    //     } catch(std::out_of_range& e){
-    //         return std::nullopt;
-    //     }
-    // }
 
 private:
     CompOrder comp_order_buy;

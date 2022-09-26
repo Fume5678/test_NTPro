@@ -7,7 +7,7 @@ using namespace std;
 User::User(std::string user_id, std::string password)
     : user_id{user_id}, password{password} {}
 
-double User::get_balance_by_curr(std::string currency) const {
+float User::get_balance_by_curr(std::string currency) const {
     try {
         return balance.at(currency);
     } catch (std::exception& e) {
